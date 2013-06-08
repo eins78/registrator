@@ -43,6 +43,11 @@
                 register.js
               </a>
             
+              
+              <a class="source" href="jquery-client.html">
+                jquery-client.js
+              </a>
+            
           </div>
         </li>
       </ul>
@@ -67,8 +72,12 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> flatiron  = require(<span class="string">'flatiron'</span>),
+    fs        = require(<span class="string">'fs'</span>),
     path      = require(<span class="string">'path'</span>),
-    app       = flatiron.app;</pre></div></div>
+    async     = require(<span class="string">'async'</span>),
+    app       = flatiron.app;
+    util      = require(<span class="string">'util'</span>),
+    mu        = require(<span class="string">'mu2'</span>);</pre></div></div>
             
         </li>
         
@@ -124,12 +133,15 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>app: internal modules</p>
+              <p>&quot;use&quot; the <code>static</code> plugin, configure it to serve all available files in <code>./static</code> under http root (<code>/</code>).
+example: <code>./client/css/style.css</code> -&gt; <code>http://app.url/css/style.css</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>app.use(require(<span class="string">"./lib/errors"</span>));
-app.use(require(<span class="string">"./lib/register"</span>));</pre></div></div>
+            <div class="content"><div class='highlight'><pre>app.use(flatiron.plugins.static, {
+  dir: path.join(__dirname, <span class="string">'client'</span>),
+  path: <span class="string">"static"</span>
+});</pre></div></div>
             
         </li>
         
@@ -137,17 +149,16 @@ app.use(require(<span class="string">"./lib/register"</span>));</pre></div></div
         <li id="section-6">
             <div class="annotation">
               
-              <div class="pilwrap for-h1">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <h1>ROUTER</h1>
-<h2>HOMEPAGE</h2>
+              <p>app: internal modules</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
-  <span class="keyword">this</span>.res.json({ <span class="string">'RTFM'</span>: <span class="string">'https://github.com/eins78/registrator/'</span> })
-});</pre></div></div>
+            <div class="content"><div class='highlight'><pre>app.use(require(<span class="string">"./lib/errors"</span>));
+app.use(require(<span class="string">"./lib/register"</span>));
+app.use(require(<span class="string">"./lib/model"</span>), app.config.get(<span class="string">'networks'</span>));</pre></div></div>
             
         </li>
         
@@ -155,48 +166,22 @@ app.use(require(<span class="string">"./lib/register"</span>));</pre></div></div
         <li id="section-7">
             <div class="annotation">
               
-              <div class="pilwrap for-h2">
+              <div class="pilwrap for-h1">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <h2>LIST: GET /knoten</h2>
+              <h1>EXTERNAL API</h1>
+<p>Functions calling the internal API and their HTTP routes 
+(would have to be decoupled when supporting more interfaces).</p>
+<p>Since routes except /home and /time need a <code>network</code> parameter, it is not further mentioned.</p>
+<h1>ROUTER</h1>
+<h2>HOMEPAGE</h2>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> listAll = <span class="function"><span class="keyword">function</span> <span class="params">(property)</span> {</span>
-  
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
   <span class="keyword">var</span> http = <span class="keyword">this</span>,
-      givenprops = [],
-      properties = [];
-  
-  givenprops.push(property);
-  [<span class="string">"properties"</span>, <span class="string">"property"</span>, <span class="string">"props"</span>, <span class="string">"prop"</span>].forEach(<span class="keyword">function</span>(key) {
-    givenprops = givenprops.concat(http.req.query[key]);
-  });
-  
-  [<span class="string">"number"</span>, <span class="string">"mac"</span>, <span class="string">"knoten"</span>].forEach(<span class="keyword">function</span>(prop) {
-    <span class="keyword">if</span> (givenprops.indexOf(prop) !== -<span class="number">1</span> || givenprops.indexOf(prop + <span class="string">'s'</span>) !== -<span class="number">1</span>) {
-      properties.push(prop);
-    }
-    <span class="keyword">if</span> (http.req.query[prop] || http.req.query[prop + <span class="string">'s'</span>]) {
-      <span class="keyword">if</span> (http.req.query[prop] !== <span class="string">"false"</span> || http.req.query[prop + <span class="string">'s'</span>] !== <span class="string">"false"</span>) {
-        properties.push(prop);        
-      }
-    }
-  });
-    
-  app.register.getAll(properties, <span class="keyword">function</span>(err, res) {
-    http.res.end(JSON.stringify((err || res), <span class="literal">null</span>, <span class="number">2</span>));
-  });
-  
-};
-
-app.router.get(<span class="string">'/knoten'</span>, listAll);
-app.router.get(<span class="string">'/GET/knoten'</span>, listAll);
-
-app.router.get(<span class="string">'/list/:property'</span>, listAll);
-app.router.get(<span class="string">'/GET/list/:property'</span>, listAll);
-app.router.get(<span class="string">'/lists/:property'</span>, listAll);
-app.router.get(<span class="string">'/GET/lists/:property'</span>, listAll);</pre></div></div>
+      network_id = <span class="string">"testnet"</span>,
+      data = {};</pre></div></div>
             
         </li>
         
@@ -204,23 +189,41 @@ app.router.get(<span class="string">'/GET/lists/:property'</span>, listAll);</pr
         <li id="section-8">
             <div class="annotation">
               
-              <div class="pilwrap for-h2">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <h2>CHECK/INFO: GET /knoten/number</h2>
+              <p>TODO: list networks</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> getKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(number)</span> {</span>
-  <span class="keyword">var</span> http = <span class="keyword">this</span>;
-  
-  app.register.get(number, <span class="keyword">function</span>(err, res) {
-    http.res.end(JSON.stringify((err || res), <span class="literal">null</span>, <span class="number">2</span>));
-  });
-};
+            <div class="content"><div class='highlight'><pre>  
+  app.register.getAll(network_id, <span class="literal">null</span>, <span class="keyword">function</span>(err, res) {
+ 
+    data.network = network_id;
+    data.name = app.config.get(<span class="string">'name'</span>);
+    
+    <span class="keyword">if</span> (res) {
+      data.knoten = res.result.knoten;      
+      data.knoten.sort(<span class="keyword">function</span>(a,b){
+        <span class="keyword">return</span> b.last_seen - a.last_seen;
+      });
+    } 
+       
+    app.renderWebsite(http, data);
+    
+ 
+  });  
+    
+});
 
-app.router.get(<span class="string">'/knoten/:number'</span>, getKnoten);
-app.router.get(<span class="string">'/GET/knoten/:number'</span>, getKnoten);</pre></div></div>
+app.renderWebsite = <span class="function"><span class="keyword">function</span> <span class="params">(http, data)</span> {</span>
+   
+  <span class="keyword">var</span> template  = <span class="string">'./client/index.mustache'</span>;
+  
+  stream = mu.compileAndRender(template, data);    
+  util.pump(stream, http.res);
+
+};</pre></div></div>
             
         </li>
         
@@ -231,24 +234,15 @@ app.router.get(<span class="string">'/GET/knoten/:number'</span>, getKnoten);</p
               <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <h2>AUTOREGISTER: POST knoten, needs mac and pass</h2>
+              <h2>LIST: GET /knoten</h2>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> postKnoten = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
-  <span class="keyword">var</span> http = <span class="keyword">this</span>, 
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> listAll = <span class="function"><span class="keyword">function</span> <span class="params">(network, property)</span> {</span>
   
-  mac = http.req.query.mac || <span class="literal">null</span>,
-  pass = http.req.query.pass || <span class="literal">null</span>;
-  
-  app.register.create(mac, pass, <span class="keyword">function</span>(err, res) {
-    http.res.end(JSON.stringify((err || res), <span class="literal">null</span>, <span class="number">2</span>));
-  });
-  
-};
-
-app.router.post(<span class="string">'/knoten'</span>, postKnoten);
-app.router.get(<span class="string">'/POST/knoten'</span>, postKnoten);</pre></div></div>
+  <span class="keyword">var</span> http = <span class="keyword">this</span>,
+      givenprops = [],
+      properties = [];</pre></div></div>
             
         </li>
         
@@ -256,31 +250,15 @@ app.router.get(<span class="string">'/POST/knoten'</span>, postKnoten);</pre></d
         <li id="section-10">
             <div class="annotation">
               
-              <div class="pilwrap for-h2">
+              <div class="pilwrap for-h3">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <h2>HEARTBEAT: PUT knoten/number, needs mac and pass</h2>
-<ul>
-<li>special: if number has no pass, set to given pass</li>
-</ul>
+              <h3><code>/$NETWORK/list/numbers</code></h3>
+<p>if a property was given as <strong>url resource</strong></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> putKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(number)</span> {</span>
-  <span class="keyword">var</span> http = <span class="keyword">this</span>,
-  
-  mac = http.req.query.mac || <span class="literal">null</span>,
-  pass = http.req.query.pass || <span class="literal">null</span>;
-  number = number || <span class="literal">null</span>;
-  
-  app.register.update(number, mac, pass, <span class="keyword">function</span>(err, res) {
-    http.res.end(JSON.stringify((err || res), <span class="literal">null</span>, <span class="number">2</span>));
-  });
-  
-};
-
-app.router.put(<span class="string">'/knoten/:number'</span>, putKnoten);
-app.router.get(<span class="string">'/PUT/knoten/:number'</span>, putKnoten);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (!property) {</pre></div></div>
             
         </li>
         
@@ -288,15 +266,687 @@ app.router.get(<span class="string">'/PUT/knoten/:number'</span>, putKnoten);</p
         <li id="section-11">
             <div class="annotation">
               
-              <div class="pilwrap for-h2">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <h2>TIMESTAMP: GET /time</h2>
+              <p>add it to the list of given properties.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> getTime = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
-  <span class="keyword">this</span>.res.end(JSON.stringify({ <span class="string">'now'</span>: <span class="keyword">new</span> Date().getTime() }, <span class="literal">null</span>, <span class="number">2</span>));
+            <div class="content"><div class='highlight'><pre>    givenprops.push(property);    
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <h3>support <code>/$NETWORK/list?prop=numbers&amp;prop=mac</code></h3>
+<p>for each of those <em>query parameters*</em>, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  [<span class="string">"properties"</span>, <span class="string">"property"</span>, <span class="string">"props"</span>, <span class="string">"prop"</span>].forEach(<span class="keyword">function</span>(parameter) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>also add it to the list if we got a <strong>value</strong> for it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    givenprops = givenprops.concat(http.req.query[parameter]);
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <h3>support <code>/$NETWORK/list?number=yes&amp;mac=1</code></h3>
+<p>for each of those <em>query parameters*</em>, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  [<span class="string">"number"</span>, <span class="string">"mac"</span>, <span class="string">"knoten"</span>].forEach(<span class="keyword">function</span>(prop) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>FIXME: wtf? not needed?
+if (givenprops.indexOf(parameter) !== -1 || givenprops.indexOf(parameter + &#39;s&#39;) !== -1) {
+properties.push(prop);
+}</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>if they are in the query (or their plural), </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (http.req.query[prop] || http.req.query[prop + <span class="string">'s'</span>]) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>and if the value is neither emty nor the string &#39;false&#39;, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (http.req.query[prop] !== <span class="string">"false"</span> || http.req.query[prop + <span class="string">'s'</span>] !== <span class="string">"false"</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>add the corresponding property to the list.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        properties.push(prop);        
+      }
+    }
+  });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <h3>call register</h3>
+<p>call internal API, with the list properties we want (if we got some, otherwise it&#39;s empty)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  app.register.getAll(network, properties, <span class="keyword">function</span>(err, res) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>and send the result of it as pretty JSON (or an error if there was one).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    http.res.end(JSON.stringify((err || res), <span class="literal">null</span>, <span class="number">2</span>));
+  });
+  
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <h3>set up the routes calling <code>listAll()</code></h3>
+<ul>
+<li><code>GET /$NETWORK/knoten</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/:network/knoten'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /GET/$NETWORK/knoten</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/GET/:network/knoten'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /$NETWORK/list?$PROPERTY=1</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/:network/list'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /GET/$NETWORK/list?$PROPERTY=1</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/GET/:network/list'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /$NETWORK/lists?$PROPERTY=1</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/:network/lists'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /GET/$NETWORK/lists?$PROPERTY=1</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/GET/:network/lists'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /$NETWORK/list/$PROPERTY</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/:network/list/:property'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /GET/$NETWORK/list/$PROPERTY</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/GET/:network/list/:property'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /$NETWORK/lists/$PROPERTY</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/:network/lists/:property'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /GET/$NETWORK/lists/$PROPERTY</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/GET/:network/lists/:property'</span>, listAll);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <h2>Get a <code>Knoten</code></h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> getKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(network, number)</span> {</span>
+  <span class="keyword">var</span> http = <span class="keyword">this</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>call the internal API, get a knoten by number</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  app.register.get(network, number, <span class="keyword">function</span>(err, res) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>send the error or result as pretty JSON.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    http.res.end(JSON.stringify((err || res), <span class="literal">null</span>, <span class="number">2</span>));
+  });
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <h3>set up the routes calling <code>getKnoten()</code></h3>
+<ul>
+<li><code>GET /$NETWORK/knoten/$NUMBER</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/:network/knoten/:number'</span>, getKnoten);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /GET/$NETWORK/knoten/$NUMBER</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/GET/:network/knoten/:number'</span>, getKnoten);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <h2>AUTOREGISTER: POST a <code>Knoten</code></h2>
+<ul>
+<li>needs mac and pass</li>
+<li>return a result with a <code>Knoten</code></li>
+<li>new number is the smallest available, where 
+available means no db entry for this number</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> postKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(network)</span> {</span>
+  <span class="keyword">var</span> http = <span class="keyword">this</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>read the request query parameters</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  mac = http.req.query.mac || <span class="literal">null</span>,
+  pass = http.req.query.pass || <span class="literal">null</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>TODO: read JSON from request body</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>call the internal API, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  app.register.create(network, mac, pass, <span class="keyword">function</span>(err, res) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>send the error or result as pretty JSON.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    http.res.end(JSON.stringify((err || res), <span class="literal">null</span>, <span class="number">2</span>));
+  });
+  
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <h3>set up the routes calling <code>postKnoten()</code></h3>
+<ul>
+<li><code>POST /$NETWORK/knoten/$NUMBER?mac=$MAC&amp;pass=$PASS</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.post(<span class="string">'/:network/knoten'</span>, postKnoten);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /POST/$NETWORK/knoten/$NUMBER?mac=$MAC&amp;pass=$PASS</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/POST/:network/knoten'</span>, postKnoten);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <h2>HEARTBEAT: PUT a <code>Knoten</code></h2>
+<ul>
+<li>needs mac and pass</li>
+<li>allow &#39;costum registration&#39;</li>
+<li>allows to capture a &#39;reserved&#39; number</li>
+<li>logic: if given number has no pass, set it to given pass</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> putKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(network, number)</span> {</span>
+  <span class="keyword">var</span> http = <span class="keyword">this</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>read the request query parameters</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  mac = http.req.query.mac || <span class="literal">null</span>,
+  pass = http.req.query.pass || <span class="literal">null</span>;
+  number = number || <span class="literal">null</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>TODO: read JSON from request body</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>call the internal API, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  app.register.update(network, number, mac, pass, <span class="keyword">function</span>(err, res) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>send the error or result as pretty JSON.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    http.res.end(JSON.stringify((err || res), <span class="literal">null</span>, <span class="number">2</span>));
+  });
+  
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h3">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <h3>set up the routes calling <code>putKnoten()</code></h3>
+<ul>
+<li><code>PUT /$NETWORK/knoten/$NUMBER?mac=$MAC&amp;pass=$PASS</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.put(<span class="string">'/:network/knoten/:number'</span>, putKnoten);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <ul>
+<li><code>GET /PUT/$NETWORK/knoten/$NUMBER?mac=$MAC&amp;pass=$PASS</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/PUT/:network/knoten/:number'</span>, putKnoten);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <h2>TIMESTAMP</h2>
+<ul>
+<li><code>GET /time</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> getTime = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>send the current timestamp as pretty JSON.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.res.end(JSON.stringify({ <span class="string">'now'</span>: <span class="keyword">new</span> Date().getTime() }, <span class="literal">null</span>, <span class="number">2</span>));
 };
 
 app.router.get(<span class="string">'/time'</span>, getTime);
@@ -305,17 +955,449 @@ app.router.get(<span class="string">'/GET/time'</span>, getTime);</pre></div></d
         </li>
         
         
-        <li id="section-12">
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h1">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <h1>STARTUP</h1>
+<ul>
+<li>start app and http server on configured port</li>
+</ul>
+<h1>Static files</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">"/static/:file"</span>, <span class="function"><span class="keyword">function</span> <span class="params">(file)</span> {</span>
+  <span class="keyword">var</span> http = <span class="keyword">this</span>,
+      target;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>serve module js from node_modules</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (file === <span class="string">"plates.js"</span>) {
+    target = path.join(__dirname, <span class="string">'node_modules'</span>, <span class="string">'plates'</span>, <span class="string">'lib'</span>, <span class="string">'plates.js'</span>);
+  } <span class="keyword">else</span> {
+    target = path.join(__dirname, <span class="string">'public'</span>, file);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>read and send the target file</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  fs.readFile(target, <span class="function"><span class="keyword">function</span> <span class="params">(err, data)</span> {</span>
+    <span class="keyword">if</span> (err) {
+      http.res.writeHead(<span class="number">500</span>);
+      <span class="keyword">return</span> http.res.end(<span class="string">'Error loading index.html'</span>);
+    }
+    http.res.writeHead(<span class="number">200</span>);
+    http.res.end(data);
+  });
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <h2>HOMEPAGE</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>app.router.get(<span class="string">'/'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+  
+  <span class="keyword">var</span> http      = <span class="keyword">this</span>,
+      template  = <span class="string">'./client/index.mustache'</span>,
+      data      = {};
+  
+  app.register.getAll(<span class="literal">null</span>, <span class="keyword">function</span>(err, res) {
+    
+    <span class="keyword">if</span> (!err) {
+      data.knoten = res.result.knoten;
+      data.knoten.sort(<span class="keyword">function</span>(a,b){<span class="keyword">return</span> b.last_seen - a.last_seen})
+    }
+    
+    data.network = app.config.get(<span class="string">'networks'</span>)[<span class="number">1</span>];
+    data.name = app.config.get(<span class="string">'name'</span>);
+    
+    app.log.debug(<span class="string">"data"</span>, data);
+    
+    stream = mu.compileAndRender(template, data);    
+    util.pump(stream, http.res);
+
+  });  
+  
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>start http server on configured port</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>app.start(app.config.get(<span class="string">'port'</span>));</pre></div></div>
+            <div class="content"><div class='highlight'><pre>app.start(app.config.get(<span class="string">'port'</span>));
+app.log.info(<span class="string">"Server started!"</span>, { <span class="string">"port"</span>: app.config.get(<span class="string">'port'</span>) })</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>Socket.io</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> io = require(<span class="string">'socket.io'</span>).listen(app.server);
+
+io.sockets.on(<span class="string">'connection'</span>, <span class="keyword">function</span>(socket) {
+  
+  socket.emit(<span class="string">'console'</span>, {
+    <span class="string">"event"</span>: <span class="string">'HELLO'</span>,
+    <span class="string">"message"</span>: <span class="string">'socket.io connected!'</span>,
+    <span class="string">"knoten"</span>: <span class="literal">null</span>,
+    <span class="string">"timestamp"</span>: (<span class="keyword">new</span> Date().toJSON())
+  });
+
+  app.resources.Knoten.on(<span class="string">'update'</span>, <span class="keyword">function</span>(doc) {
+    socket.emit(<span class="string">'console'</span>, {
+      <span class="string">"event"</span>: <span class="string">"HEARTBEAT"</span>,
+      <span class="string">"message"</span>: <span class="literal">null</span>,
+      <span class="string">"id"</span>: doc.id,
+      <span class="string">"network"</span>: doc.network_id,
+      <span class="string">"timestamp"</span>: (<span class="keyword">new</span> Date().toJSON())
+    });
+  });  
+
+  app.resources.Knoten.on(<span class="string">'save'</span>, <span class="keyword">function</span>(doc) {
+    
+    require(<span class="string">'eyes'</span>).inspect(doc);
+    
+    socket.emit(<span class="string">'console'</span>, {
+      <span class="string">"event"</span>: <span class="string">"REGISTER"</span>,
+      <span class="string">"message"</span>: <span class="literal">null</span>,
+      <span class="string">"id"</span>: doc.id,
+      <span class="string">"network"</span>: doc.network_id,
+      <span class="string">"timestamp"</span>: (<span class="keyword">new</span> Date().toJSON())
+    });
+  });  
+
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <h2>Check Database, Check and Setup Networks</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>(<span class="function"><span class="keyword">function</span> <span class="title">bootstrapDB</span> <span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <ul>
+<li>make tmp arrays</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> networks = app.config.get(<span class="string">'networks'</span>),
+      configuredNetworks = [],
+      databasedNetworks = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>bootstrap() sets up network in db if it does not exist</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> bootstrap = <span class="function"><span class="keyword">function</span> <span class="params">(network, callback)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>add network to the tmp array</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    configuredNetworks.push(network.name);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>check if it already exists in db.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    app.resources.Network.get(network.name, <span class="keyword">function</span>(err, res) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>If we got an error db error, we exit!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (err &amp;&amp; err.status &gt; <span class="number">500</span>) {
+        <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">"DB error! Cannot run!"</span>)
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>If the network is not found, we create it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">else</span> <span class="keyword">if</span> (err &amp;&amp; err.status === <span class="number">404</span>) {
+      
+        app.resources.Network.create({
+          id: network.name
+        }, <span class="keyword">function</span>(err, network){
+  
+          <span class="keyword">if</span> (err) {
+          
+            <span class="keyword">var</span> msg = <span class="string">"could not create network"</span> + network.name;
+            
+            app.log.error(msg, err);
+            callback(<span class="keyword">new</span> Error(msg));
+            
+          } <span class="keyword">else</span> {
+          
+            app.log.debug(<span class="string">"created network!"</span>, network);
+            callback();
+          }
+        
+        });
+      
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p>if we found the network and the id is correct</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">else</span> <span class="keyword">if</span> (!err &amp;&amp; res.id === network.name) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>just callback</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        callback();
+
+      } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>something is very wrong</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        callback(<span class="keyword">new</span> Error(<span class="string">"Network"</span> + <span class="string">" is not "</span> +  network.name + <span class="string">"!"</span>))
+      }
+    
+    });
+  
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>Run async setup for each of the networks 
+and run the self check after all of them completed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  async.each(networks, bootstrap, <span class="keyword">function</span>(err) {
+        
+    <span class="keyword">if</span> (err) {
+      app.log.error(<span class="string">"DB Bootstrap failed!"</span>, err);
+    }
+    
+    Network.all(<span class="keyword">function</span>(err, networksInDB) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>and for each network</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (networksInDB) {        
+        networksInDB.forEach(<span class="keyword">function</span>(n) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>add it to the tmp list.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          console.log(n.id)
+          databasedNetworks.push(n.id);
+        });
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>debug: log configured and actual networks</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      app.log.debug(<span class="string">" networks configured:"</span>, configuredNetworks.sort().toString());
+      app.log.debug(<span class="string">"networks in database:"</span>, databasedNetworks.sort().toString());</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-72">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-72">&#182;</a>
+              </div>
+              <p>exit if they are not the same!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> ( configuredNetworks.sort().toString() !== databasedNetworks.sort().toString() ) {
+        app.log.error(<span class="string">"Self-check: Networks are broken! :("</span>);
+      } <span class="keyword">else</span> {
+        app.log.info(<span class="string">"self-check:"</span>, {<span class="string">'networks_ok'</span>: <span class="literal">true</span>})
+      }
+  
+    });
+    
+  });
+  
+})();</pre></div></div>
             
         </li>
         

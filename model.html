@@ -43,6 +43,11 @@
                 register.js
               </a>
             
+              
+              <a class="source" href="jquery-client.html">
+                jquery-client.js
+              </a>
+            
           </div>
         </li>
       </ul>
@@ -66,7 +71,8 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> resourceful = require(<span class="string">'resourceful'</span>),
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> crypto = require(<span class="string">'./common'</span>).crypto,
+    resourceful = require(<span class="string">'resourceful'</span>),
     resources = {};</pre></div></div>
             
         </li>
@@ -75,32 +81,8 @@
         <li id="section-2">
             <div class="annotation">
               
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-2">&#182;</a>
-              </div>
-              <p>set up resourceful to use couchdb</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>resourceful.use(<span class="string">'couchdb'</span>, {
-  <span class="string">"https"</span>: <span class="literal">false</span>,
-  <span class="string">"uri"</span>: <span class="string">'couchdb://couch.js.ars.is'</span>,
-  <span class="string">"database"</span>: <span class="string">"test_registrator"</span>,
-  <span class="string">"port"</span>: <span class="string">"80"</span>,
-  <span class="string">"auth"</span>: {
-        <span class="string">"username"</span>: process.env[<span class="string">"COUCH_USER"</span>],
-        <span class="string">"password"</span>: process.env[<span class="string">"COUCH_PASS"</span>]
-      }
-});</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-3">
-            <div class="annotation">
-              
               <div class="pilwrap for-h1">
-                <a class="pilcrow" href="#section-3">&#182;</a>
+                <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
               <h1>Models/Resources</h1>
 
@@ -109,73 +91,21 @@
         </li>
         
         
-        <li id="section-4">
+        <li id="section-3">
             <div class="annotation">
               
               <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-4">&#182;</a>
+                <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <h2>Resource: Knoten</h2>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Knoten = resources.Knoten = 
-resourceful.define(<span class="string">'knoten'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-5">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
-              </div>
-              <p>Specify some properties</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.string(<span class="string">'mac'</span>);
-  <span class="keyword">this</span>.string(<span class="string">'pass'</span>);
-  <span class="keyword">this</span>.timestamps();
-    
-});
-  
-Knoten.property(<span class="string">'number'</span>, <span class="string">'number'</span>, {
-  get: <span class="keyword">function</span>() {
-    <span class="keyword">return</span> parseInt(<span class="keyword">this</span>.properties.id);
-  }
-});
-  
-Knoten.property(<span class="string">'created_at'</span>, <span class="string">'number'</span>, {
-  get: <span class="keyword">function</span>() {
-    <span class="keyword">return</span> <span class="keyword">this</span>.properties.ctime;
-  }
-});
-  
-Knoten.property(<span class="string">'last_seen'</span>, <span class="string">'number'</span>, {
-  get: <span class="keyword">function</span>() {
-    <span class="keyword">return</span> <span class="keyword">this</span>.properties.mtime;
-  }
-});</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <h2>Resource: Network</h2>
+              <h2><code>Network</code></h2>
+<p>Define <code>Network</code> resource with properties.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Network = resources.Network = 
 resourceful.define(<span class="string">'network'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
     
-  <span class="keyword">this</span>.string(<span class="string">'name'</span>);
+  <span class="keyword">this</span>.string(<span class="string">'url'</span>);
   <span class="keyword">this</span>.number(<span class="string">'range_min'</span>);
   <span class="keyword">this</span>.number(<span class="string">'range_max'</span>);
   <span class="keyword">this</span>.number(<span class="string">'lease_days'</span>);
@@ -186,17 +116,72 @@ resourceful.define(<span class="string">'network'</span>, <span class="function"
         </li>
         
         
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <h2><code>Knoten</code></h2>
+<p>Define <code>Knoten</code> resource with properties.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Knoten = resources.Knoten = 
+resourceful.define(<span class="string">'knoten'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    
+  <span class="keyword">this</span>.string(<span class="string">'mac'</span>);
+  <span class="keyword">this</span>.string(<span class="string">'pass'</span>);
+  <span class="keyword">this</span>.timestamps();
+    
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Define &#39;virtual property <code>number</code> (used externally instead of <code>id</code>)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>Knoten.property(<span class="string">'number'</span>, <span class="string">'number'</span>, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <ul>
+<li>configure a getter:</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  get: <span class="keyword">function</span>() {</pre></div></div>
+            
+        </li>
+        
+        
         <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>export the resources as module</p>
+              <p>get own id, </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.resources = resources;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> id = <span class="keyword">this</span>.properties.id,</pre></div></div>
             
         </li>
         
@@ -207,11 +192,11 @@ resourceful.define(<span class="string">'network'</span>, <span class="function"
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>export self as broadway plugin</p>
+              <p>setup a regex stripping just the number from the <code>id</code> (like &quot;network/testnet/178&quot;)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.attach = <span class="function"><span class="keyword">function</span> <span class="params">(options)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>        reg = <span class="regexp">/network\/\w+\/(\d+)/</span>;</pre></div></div>
             
         </li>
         
@@ -222,16 +207,284 @@ resourceful.define(<span class="string">'network'</span>, <span class="function"
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>attach resources to app</p>
+              <p>and return the result of regex replace of own <code>id</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">return</span> parseInt(id.toString().replace(reg, <span class="string">"$1"</span>));
+  }
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <ul>
+<li>Define &#39;virtual property <code>pass</code></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>Knoten.property(<span class="string">'pass'</span>, <span class="string">'string'</span>, {
+  
+  get: <span class="keyword">function</span>() {
+    <span class="keyword">return</span> <span class="keyword">this</span>.properties.pass_hashed;
+  }
+  
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <ul>
+<li>Define &#39;virtual property <code>location</code> (gives path for URL)</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>Knoten.property(<span class="string">'location'</span>, <span class="string">'string'</span>, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <ul>
+<li>configure a getter:</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  get: <span class="keyword">function</span>() {   
+    <span class="keyword">return</span> <span class="string">'/'</span> + <span class="keyword">this</span>.network_id + <span class="string">'/knoten/'</span> + <span class="keyword">this</span>.number;
+  }
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <ul>
+<li>Define &#39;virtual property <code>created_at</code> (used externally instead of <code>ctime</code>)</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>Knoten.property(<span class="string">'created_at'</span>, <span class="string">'number'</span>, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>validation: must be unix timestamp</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  format: <span class="string">'unix-time'</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>getter: just return the <code>ctime</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  get: <span class="keyword">function</span>() {
+    <span class="keyword">return</span> <span class="keyword">this</span>.properties.ctime;
+  }
+  
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <ul>
+<li>Define &#39;virtual property <code>last_seen</code> (used externally instead of <code>mtime</code>)</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>Knoten.property(<span class="string">'last_seen'</span>, <span class="string">'number'</span>, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>validation: must be unix timestamp</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  format: <span class="string">'unix-time'</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>getter: just return the <code>mtime</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  get: <span class="keyword">function</span>() {
+    <span class="keyword">return</span> <span class="keyword">this</span>.properties.mtime;
+  }
+  
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Define <code>Network</code> as parent of <code>Knoten</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>Knoten.parent(<span class="string">'network'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>export the resources as module</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.resources = resources;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>export self as broadway plugin</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.attach = <span class="function"><span class="keyword">function</span> <span class="params">(configuredNetworks)</span> {</span>
+  
+  <span class="keyword">var</span> app = <span class="keyword">this</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>set up resourceful to use couchdb</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  resourceful.use(<span class="string">'couchdb'</span>, app.config.get(<span class="string">'couch'</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>attach resources to app on plugin attach.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="keyword">this</span>.resources = resources;
+  
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>init</p>
 
-};
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.init = <span class="function"><span class="keyword">function</span> <span class="params">(done)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>nothin to do</p>
 
-exports.init = <span class="function"><span class="keyword">function</span> <span class="params">(done)</span> {</span>
-  done();
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  done();
 };</pre></div></div>
             
         </li>

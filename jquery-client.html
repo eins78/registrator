@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>REGISTRATOR client (jquery)</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="app.html">
+                app.js
+              </a>
+            
+              
+              <a class="source" href="common.html">
+                common.js
+              </a>
+            
+              
+              <a class="source" href="errors.html">
+                errors.js
+              </a>
+            
+              
+              <a class="source" href="model.html">
+                model.js
+              </a>
+            
+              
+              <a class="source" href="register.html">
+                register.js
+              </a>
+            
+              
+              <a class="source" href="jquery-client.html">
+                jquery-client.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h1">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1>REGISTRATOR client (jquery)</h1>
+<blockquote>
+<p>Structure loosely based on <a href="http://underscorejs.org/docs/underscore.html">underscore</a></p>
+</blockquote>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>(<span class="keyword">function</span>() {
+  
+  <span class="keyword">var</span> root = <span class="keyword">this</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h2>FFReg</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>First, config object (JSON): </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  config = {
+    <span class="string">"BaseURL"</span>: <span class="string">"http://reg.weimarnetz.de/ffweimar"</span>
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Everything is encapsulated into the <code>FFReg</code> object, which will be attached to <code>global</code> later.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  FFReg = {
+    <span class="string">"VERSION"</span>: <span class="string">"0.0.0"</span>
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <h2>Functions</h2>
+<h3>Check</h3>
+<p>A function to check a <strong>number</strong> against the <em>Registrator</em>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  FFReg.check = <span class="function"><span class="keyword">function</span> <span class="params">(number, callback)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>First, some sanity checks</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (!number) {
+      console.log(<span class="string">"FFReg.check(): no number to check!"</span>);
+      <span class="keyword">return</span>;
+    }
+
+    <span class="keyword">if</span> (!window.$) {
+      console.log(<span class="string">"FFReg.check(): no JQuery!"</span>);
+      <span class="keyword">return</span>;          
+    } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>set up JQuery</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">var</span> JQuery = window.$;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>If all is well, get the <strong>number</strong>&#39;s status from <em>Registrator</em> with <code>JQuery.ajax()</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    jQuery.ajax(config.BaseURL + <span class="string">"/knoten/"</span> + number, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>When the request completes, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      complete: <span class="function"><span class="keyword">function</span> <span class="title">complete</span><span class="params">(jqXHR, textStatus)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>get the received data</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> answer = {
+          <span class="string">"textStatus"</span>: textStatus,
+          <span class="string">"data"</span>: JSON.parse(jqXHR.responseText),
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>and &quot;analyze&quot; it:</p>
+<ul>
+<li>If the was a <code>HTTP Error 404</code>, the number is <em>FREE</em></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (answer.data.status === <span class="number">404</span>) {
+          answer.free = <span class="literal">true</span>;
+          answer.result = <span class="string">"FREE! "</span> + answer.data.result + <span class="string">"!"</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <ul>
+<li>If the was a <code>HTTP Status 200</code>, the number is <em>TAKEN</em></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        } <span class="keyword">else</span> <span class="keyword">if</span> (answer.data.status === <span class="number">200</span>) {
+          answer.free = <span class="literal">false</span>;
+          answer.result = <span class="string">"TAKEN! Number "</span> + number + <span class="string">" registered"</span> + (answer.data.result.mac ? (<span class="string">" to MAC "</span> + answer.data.result.mac) : (<span class="string">""</span>)) + <span class="string">"!"</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <ul>
+<li>Otherwise, it is an <em>error</em></li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        } <span class="keyword">else</span> {
+          answer.free = <span class="literal">null</span>;
+          answer.result = <span class="string">"WTF:"</span> + JSON.stringify(answer.data);
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>We log the data and result to the console, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        console.log(JSON.stringify(answer));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>and call back with the same answer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (<span class="keyword">typeof</span> callback === <span class="string">'function'</span>) {
+          callback(answer);                  
+        }
+      }
+    });
+
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Lastly, we semi-safely attach <strong>FFReg</strong> to the <code>global</code> object.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (!root.FFReg) {
+    root.FFReg = FFReg;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>The above is run once on page load. That is all.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>})();</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

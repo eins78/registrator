@@ -43,6 +43,11 @@
                 register.js
               </a>
             
+              
+              <a class="source" href="jquery-client.html">
+                jquery-client.js
+              </a>
+            
           </div>
         </li>
       </ul>
@@ -67,7 +72,9 @@
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> tool = require(<span class="string">'./common'</span>).tool,
-    Knoten = require(<span class="string">'./model'</span>).resources.Knoten;</pre></div></div>
+    crypto = require(<span class="string">'./common'</span>).crypto,
+    Knoten = require(<span class="string">'./model'</span>).resources.Knoten;
+    Network = require(<span class="string">'./model'</span>).resources.Network;</pre></div></div>
             
         </li>
         
@@ -78,7 +85,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p><code>exports.attach</code> gets called by broadway on <code>app.use</code></p>
+              <ul>
+<li><code>exports.attach</code> gets called by broadway on <code>app.use</code></li>
+</ul>
 
             </div>
             
@@ -93,7 +102,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>this is our app</p>
+              <ul>
+<li>this is our app</li>
+</ul>
 
             </div>
             
@@ -111,15 +122,9 @@
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
               <h1>FUNCTIONS</h1>
+<h2>getfirstFreeNumber</h2>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>  
-  <span class="keyword">var</span> getfirstFreeNumber = <span class="keyword">function</span>(callback) {
-    
-    app.log.debug(<span class="string">"getfirstFreeNumber()"</span>);
-    
-    <span class="keyword">var</span> freeNumber, tryNumber, now;</pre></div></div>
             
         </li>
         
@@ -127,16 +132,28 @@
         <li id="section-5">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>initialize search</p>
+              <h2><code>whiteList(knoten)</code></h2>
+<p>returns a new knoten object, 
+with just the properties we want (if they exist)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    freeNumber = <span class="literal">null</span>;
-    tryNumber = <span class="number">2</span>;
-    now = <span class="keyword">new</span> Date();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> whiteList = <span class="function"><span class="keyword">function</span> <span class="params">(knoten)</span> {</span>
+    
+    <span class="keyword">var</span> whitelisted = {
+      <span class="string">"number"</span>: knoten.number,           
+      <span class="string">"mac"</span>: knoten.mac,
+      <span class="string">"last_seen"</span>: knoten.last_seen,
+      <span class="string">"network"</span>: knoten.network_id,           
+      <span class="string">"location"</span>: knoten.location
+    };
+    
+    <span class="keyword">return</span> whitelisted;
+    
+  },</pre></div></div>
             
         </li>
         
@@ -144,17 +161,22 @@
         <li id="section-6">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>get network database
-pro tip: do this with reasonable low caching in respect to leases timing out</p>
+              <h2><code>getfirstFreeNumber(network, callback)</code></h2>
+<ul>
+<li>gets the first free <code>number</code> from a <code>network</code> resource</li>
+<li>fail()s if there is no free number</li>
+</ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    Knoten.all(<span class="keyword">function</span>(err, res) {
-      
-      <span class="keyword">if</span> (err) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  getfirstFreeNumber = <span class="function"><span class="keyword">function</span> <span class="params">(network, callback)</span> {</span>
+    
+    app.log.debug(<span class="string">"getfirstFreeNumber()"</span>);
+    
+    <span class="keyword">var</span> freeNumber, tryNumber, now;</pre></div></div>
             
         </li>
         
@@ -165,13 +187,15 @@ pro tip: do this with reasonable low caching in respect to leases timing out</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>fail in case of db error</p>
+              <ul>
+<li>initialize search</li>
+</ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        app.fail(<span class="number">500</span>, e, callback);
-        <span class="keyword">return</span>;
-      }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    freeNumber = <span class="literal">null</span>;
+    tryNumber = <span class="number">2</span>;
+    now = <span class="keyword">new</span> Date();</pre></div></div>
             
         </li>
         
@@ -182,7 +206,50 @@ pro tip: do this with reasonable low caching in respect to leases timing out</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>prepare the result :)</p>
+              <ul>
+<li>get <em>network</em> database</li>
+</ul>
+<blockquote>
+<p>pro tip: do this with reasonable low caching in respect to leases timing out</p>
+</blockquote>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    network.knotens(<span class="function"><span class="keyword">function</span> <span class="params">(err, res)</span> {</span>
+    
+      <span class="keyword">if</span> (err) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <ul>
+<li>fail in case of db error</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        app.fail(<span class="number">500</span>, e, callback);
+        <span class="keyword">return</span>;
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <ul>
+<li>prepare the result <code>:)</code></li>
+</ul>
 
             </div>
             
@@ -195,46 +262,20 @@ pro tip: do this with reasonable low caching in respect to leases timing out</p>
         </li>
         
         
-        <li id="section-9">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>check incrementing number till usable found
-free === not in db; or with lease timed out</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      checkNumber: <span class="keyword">while</span> (!freeNumber || tryNumber &lt; <span class="number">255</span> ) {</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-10">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
-              </div>
-              <p>check if the number exists</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (register.hasOwnProperty(tryNumber)) {</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>check if the lease timed out</p>
+              <ul>
+<li>check incrementing <em>number</em> till usable found
+(<em>&quot;free&quot;</em> means not in db; or with lease timed out)</li>
+</ul>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>       checkNumber: <span class="keyword">while</span> (!freeNumber || tryNumber &lt; <span class="number">255</span> ) {</pre></div></div>
             
         </li>
         
@@ -245,13 +286,11 @@ free === not in db; or with lease timed out</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>current lease time in days</p>
+              <p>check if the number exists</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> leasedays = ((now - <span class="keyword">new</span> Date(register[tryNumber][<span class="string">"last_seen"</span>]))/<span class="number">1000</span>/<span class="number">60</span>/<span class="number">60</span>/<span class="number">24</span>)
-                    
-          <span class="keyword">if</span> (leasedays &gt; <span class="number">30</span>) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (register.hasOwnProperty(tryNumber)) {</pre></div></div>
             
         </li>
         
@@ -262,30 +301,11 @@ free === not in db; or with lease timed out</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>if lease timed out, we have our number!</p>
+              <ul>
+<li>check if the <em>lease</em> timed out</li>
+</ul>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>            app.log.debug(<span class="string">"found number because lease timed out"</span>, trynumber, leasedays);
-            freeNumber = tryNumber;
-            <span class="keyword">break</span> checkNumber;
-            
-          }
-          
-        }
-        
-        <span class="keyword">if</span> (!register.hasOwnProperty(tryNumber)) {
-          
-          freeNumber = tryNumber;
-          <span class="keyword">break</span> checkNumber;
-           
-        } <span class="keyword">else</span> {
-          
-          tryNumber = tryNumber + <span class="number">1</span>;
-          
-        }
-        
-      }</pre></div></div>
             
         </li>
         
@@ -296,12 +316,15 @@ free === not in db; or with lease timed out</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
-              <p>if we got finished the loop without finding a number,
-we give up :(</p>
+              <ul>
+<li>calculate current <em>lease</em> time in days</li>
+</ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (!freeNumber) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> leasedays = ((now - <span class="keyword">new</span> Date(register[tryNumber][<span class="string">"last_seen"</span>]))/<span class="number">1000</span>/<span class="number">60</span>/<span class="number">60</span>/<span class="number">24</span>)
+                  
+          <span class="keyword">if</span> (leasedays &gt; <span class="number">30</span>) {</pre></div></div>
             
         </li>
         
@@ -312,13 +335,19 @@ we give up :(</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
-              <p>TODO: give correct error</p>
+              <ul>
+<li>if <em>lease</em> timed out, we have our <em>number</em>!</li>
+</ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        callback(<span class="string">"ERROR!"</span>, <span class="literal">null</span>);
+            <div class="content"><div class='highlight'><pre>            app.log.debug(<span class="string">"found number because lease timed out"</span>, trynumber, leasedays);
+            freeNumber = tryNumber;
+            <span class="keyword">break</span> checkNumber;
+          
+          }
         
-      } <span class="keyword">else</span> {</pre></div></div>
+        }</pre></div></div>
             
         </li>
         
@@ -329,18 +358,11 @@ we give up :(</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>yay, we callback with the fresh number</p>
+              <p>When the <em>number</em> does not exist in the registry at all, </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        callback(<span class="literal">null</span>, freeNumber);
-      }
-              
-    });
-      
-  },
-        
-  createKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(leknoten, callback)</span> {</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (!register.hasOwnProperty(tryNumber)) {</pre></div></div>
             
         </li>
         
@@ -351,10 +373,20 @@ we give up :(</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
-              <p>this always get called with given:
-(fresh) number, pass, maybe mac </p>
+              <p>we have our <em>number</em>!</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>          freeNumber = tryNumber;
+          <span class="keyword">break</span> checkNumber;
+         
+        } <span class="keyword">else</span> {
+        
+          tryNumber = tryNumber + <span class="number">1</span>;
+        
+        }
+      
+      }</pre></div></div>
             
         </li>
         
@@ -365,10 +397,14 @@ we give up :(</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
-              <p>also, all prechecks are already done!
-if we reach this point, we are creating a new number (also means the mac is not already known).</p>
+              <ul>
+<li>if we got finished the loop without finding a <em>number</em>,
+we give up <code>:(</code></li>
+</ul>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (!freeNumber) {</pre></div></div>
             
         </li>
         
@@ -379,16 +415,15 @@ if we reach this point, we are creating a new number (also means the mac is not 
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              <p>we use the number as our id</p>
+              <ul>
+<li>TODO: give correct error</li>
+</ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    leknoten.id = leknoten.number;
-    <span class="keyword">delete</span> leknoten.number;
-        
-    app.log.debug(<span class="string">'REG: Create Knoten!'</span>, leknoten);
-          
-    Knoten.create(leknoten, <span class="keyword">function</span>(err, result) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        callback(<span class="string">"ERROR!"</span>, <span class="literal">null</span>);
+      
+      } <span class="keyword">else</span> {</pre></div></div>
             
         </li>
         
@@ -399,12 +434,18 @@ if we reach this point, we are creating a new number (also means the mac is not 
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
-              <p>we get the result back from the db</p>
+              <ul>
+<li>yay, we callback with the fresh <em>number</em></li>
+</ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        
-      <span class="keyword">if</span> (err) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        callback(<span class="literal">null</span>, freeNumber);
+      }
+            
+    });
+          
+  },</pre></div></div>
             
         </li>
         
@@ -412,17 +453,14 @@ if we reach this point, we are creating a new number (also means the mac is not 
         <li id="section-21">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
-              <p>db error at this stage is our fault</p>
+              <h2><code>createKnoten(network, knoten, callback)</code></h2>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        app.fail(<span class="number">500</span>, err, callback);
-        <span class="keyword">return</span>;
-          
-      } <span class="keyword">else</span> {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  createKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(network_id, leknoten, callback)</span> {</span></pre></div></div>
             
         </li>
         
@@ -433,19 +471,13 @@ if we reach this point, we are creating a new number (also means the mac is not 
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
-              <p>build answer</p>
+              <p>This always get called with given:
+ <em> </em>network_id<em>
+ </em> (fresh) <em> number</em>
+ <em> </em>pass<em>
+ </em> maybe <em>mac</em></p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> a = {
-          <span class="string">"status"</span>: <span class="number">201</span>,
-          <span class="string">"message"</span>: <span class="string">"Created!"</span>,
-          <span class="string">"result"</span>: {
-            <span class="string">"number"</span>: result.number,
-            <span class="string">"mac"</span>: result.mac || <span class="literal">null</span>,
-            <span class="string">"last_seen"</span>: result[<span class="string">"last_seen"</span>]
-          }
-        };</pre></div></div>
             
         </li>
         
@@ -456,20 +488,10 @@ if we reach this point, we are creating a new number (also means the mac is not 
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
-              <p>success!</p>
+              <p>Also, all prechecks are already done!
+If we reach this point, we are creating a new <em>number</em> (also means the <em>mac</em> is not already known).</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>        app.log.debug(<span class="string">"REG: Success!"</span>, a);
-        callback(<span class="literal">null</span>, a);
-              
-      }
-            
-    });
-    
-  },
-
-  updateKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(leknoten, callback)</span> {</span></pre></div></div>
             
         </li>
         
@@ -480,10 +502,18 @@ if we reach this point, we are creating a new number (also means the mac is not 
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
-              <p>this always get called with given:
-registered number, pass, maybe mac </p>
+              <ul>
+<li>we use the <em>number</em> as our id</li>
+</ul>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>    leknoten.id = leknoten.number;
+    <span class="keyword">delete</span> leknoten.number;
+    leknoten.pass_hashed = crypto.hash(leknoten.pass);
+    <span class="keyword">delete</span> leknoten.pass;    
+        
+    app.log.debug(network_id + <span class="string">": REG: Create Knoten!"</span>, leknoten);</pre></div></div>
             
         </li>
         
@@ -494,18 +524,11 @@ registered number, pass, maybe mac </p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
-              <p>also, all prechecks are already done!
-if we reach this point, we are updating a registered number (also means pass was checked).</p>
+              <p>get the network</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    
-              
-    app.log.debug(<span class="string">"REG: Update Knoten:"</span>, leknoten);
-    
-    Knoten.get(leknoten.number, <span class="function"><span class="keyword">function</span> <span class="params">(err, knoten)</span> {</span>
-      
-      <span class="keyword">if</span> (err) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    Network.get(network_id, <span class="keyword">function</span>(err, network) {</pre></div></div>
             
         </li>
         
@@ -516,7 +539,217 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
+              <ul>
+<li>we get the result back from the db</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        
+      <span class="keyword">if</span> (err) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <ul>
+<li>db error at this stage is our fault</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        app.fail(<span class="number">500</span>, err, callback);
+        <span class="keyword">return</span>;
+        
+      }
+      
+      <span class="keyword">else</span> {
+                
+        network.createKnoten(leknoten, <span class="function"><span class="keyword">function</span> <span class="params">(err, result)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>we get the result back from the db</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    
+          <span class="keyword">if</span> (err) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
               <p>db error at this stage is our fault</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            app.fail(<span class="number">500</span>, err, callback);
+            <span class="keyword">return</span>;
+      
+          } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <ul>
+<li>build answer…</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> a = {
+              <span class="string">"status"</span>: <span class="number">201</span>,
+              <span class="string">"message"</span>: <span class="string">"Created!"</span>,
+              <span class="string">"result"</span>: whiteList(result)
+            };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <ul>
+<li>success!</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            app.log.debug(network_id + <span class="string">": REG: Success!"</span>, a.result);
+            callback(<span class="literal">null</span>, a);
+        
+          }
+                  
+        });
+        
+      }
+      
+    });
+  
+  },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <h2>updateKnoten</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  updateKnoten = <span class="function"><span class="keyword">function</span> <span class="params">(network_id, leknoten, callback)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>This always get called with given:
+ <em> </em>network_id<em>
+ </em> registered <em>number</em>
+ <em> </em>pass<em>
+ </em> maybe <em>mac</em></p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>also, all prechecks are already done!
+if we reach this point, we are updating a registered number (also means pass was checked).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    app.log.debug(network_id + <span class="string">": REG: Update Knoten:"</span>, leknoten);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>we use the number as our id // FIXME: use virtual property setter</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    leknoten.id = leknoten.number;
+    <span class="keyword">delete</span> leknoten.number;    
+    leknoten.pass_hashed = crypto.hash(leknoten.pass);
+    <span class="keyword">delete</span> leknoten.pass;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>get the <code>Knoten</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    Knoten.get(<span class="string">'network/'</span> + network_id + <span class="string">'/'</span> + leknoten.id, <span class="function"><span class="keyword">function</span> <span class="params">(err, knoten)</span> {</span>
+      
+      <span class="keyword">if</span> (err) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <ul>
+<li>db error at this stage is our fault</li>
+</ul>
 
             </div>
             
@@ -531,13 +764,15 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-27">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <p>we get the result back from the db</p>
+              <ul>
+<li>we get the result back from the db</li>
+</ul>
 
             </div>
             
@@ -547,13 +782,15 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-28">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
-              <p>db error at this stage is our fault</p>
+              <ul>
+<li>db error at this stage is our fault</li>
+</ul>
 
             </div>
             
@@ -566,41 +803,40 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-29">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
-              <p>build answer</p>
+              <ul>
+<li>build answer…</li>
+</ul>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> a = {
               <span class="string">"status"</span>: <span class="number">200</span>,
-              <span class="string">"msg"</span>: <span class="string">"ok"</span>,
-              <span class="string">"result"</span>: {
-                <span class="string">"number"</span>: result.number,
-                <span class="string">"mac"</span>: result.mac,
-                <span class="string">"created_at"</span>: result.created_at,
-                <span class="string">"last_seen"</span>: result.last_seen
-              }
+              <span class="string">"message"</span>: <span class="string">"updated"</span>,
+              <span class="string">"result"</span>: whiteList(result)
             };</pre></div></div>
             
         </li>
         
         
-        <li id="section-30">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
-              <p>success!</p>
+              <ul>
+<li>success!</li>
+</ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            app.log.debug(<span class="string">"REG: Success!"</span>, a);
+            <div class="content"><div class='highlight'><pre>            app.log.debug(network_id + <span class="string">": HEARTBEAT: "</span>, a.result);
             callback(<span class="literal">null</span>, a);
             
           }
@@ -616,20 +852,33 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-31">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap for-h1">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <h1>PUBLIC METHODS</h1>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  app.register = {};
+            <div class="content"><div class='highlight'><pre>  app.register = {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <h2>app.register.getAll</h2>
 
-  app.register.getAll = <span class="function"><span class="keyword">function</span> <span class="params">(wanted, callback)</span> {</span>
-    
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  app.register.getAll = <span class="function"><span class="keyword">function</span> <span class="params">(network_id, wanted, callback)</span> {</span>
+        
     <span class="keyword">var</span> a = {},
         list = {};
     a.status = <span class="number">200</span>;
@@ -639,11 +888,11 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-32">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>Set default wanted, if none given.</p>
 
@@ -656,11 +905,11 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-33">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <p>prepare arrays for each possibly wanted property list</p>
 
@@ -671,11 +920,11 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-34">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
               <p>create an list array</p>
 
@@ -688,213 +937,17 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-35">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
-              </div>
-              <p>Fetch the database.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    Knoten.all(<span class="function"><span class="keyword">function</span> <span class="params">(err, res)</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-36">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
-              </div>
-              <p>If there was an error, </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (err) {</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-37">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
-              </div>
-              <p>that would be a db error, so it is our fault.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        app.fail(<span class="number">500</span>, <span class="string">"Sorry, this is a bug  m("</span>, callback);
-        <span class="keyword">return</span>;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-38">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
-              </div>
-              <p>If there was no error, </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      } 
-      <span class="keyword">else</span> {</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-39">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
-              </div>
-              <p>If no error, we build an answer:</p>
-<p>Now, for each database object, </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        Object.keys(res).forEach(<span class="function"><span class="keyword">function</span> <span class="params">(nr)</span>{</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-40">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
-              </div>
-              <p>make a tmp knoten, </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> knoten = {};</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-41">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
-              </div>
-              <p>add the whitelisted properties; </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>          whitelist.forEach(<span class="function"><span class="keyword">function</span> <span class="params">(prop)</span> {</span>
-            knoten[prop] = res[nr][prop];
-          });</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-42">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
-              </div>
-              <p>and for each possible list</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>          lists.forEach(<span class="function"><span class="keyword">function</span> <span class="params">(prop)</span> {</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-43">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
-              </div>
-              <p>if there is such a property, </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (res[nr][prop]) {</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-44">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
-              </div>
-              <p>add it to its list array; </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>              list[prop].push(res[nr][prop] || knoten[prop]);
-            
-            }
-            <span class="keyword">else</span> <span class="keyword">if</span> (prop === <span class="string">"knoten"</span>) {</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-45">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
-              </div>
-              <p>also add the knoten itself into list. </p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>              list.knoten.push(knoten);
-            
-            }
-                          
-          });
-          
-        });
-        
-      }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-46">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
-              </div>
-              <p>now, for each possible list</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      lists.forEach(<span class="keyword">function</span>(prop) {</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
-              <p>If the list is wanted, </p>
+              <p>Get the network</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (wanted.indexOf(prop) !== -<span class="number">1</span> ) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    Network.get(network_id, <span class="keyword">function</span>(err, network) {</pre></div></div>
             
         </li>
         
@@ -905,11 +958,14 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
-              <p>add it to the result, </p>
+              <p>fail if there was an error</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span> (prop === <span class="string">"knoten"</span>) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (err || !network) {
+        <span class="keyword">var</span> msg = <span class="string">"Network "</span> + network_id + <span class="string">" not found!"</span>;
+        <span class="keyword">return</span> app.fail(<span class="number">404</span>, msg, callback);
+      };</pre></div></div>
             
         </li>
         
@@ -920,13 +976,11 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
-              <p>in case its a knoten in singular, </p>
+              <p>otherwise, get this networks knoten</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            a.result[prop] = list[prop];
-            
-          } <span class="keyword">else</span> {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      network.knotens(<span class="function"><span class="keyword">function</span> <span class="params">(err, res)</span> {</span></pre></div></div>
             
         </li>
         
@@ -937,16 +991,11 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
-              <p>otherwise in plural.</p>
+              <p>If there was an error, </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            a.result[prop + <span class="string">"s"</span>] = list[prop];
-
-          }
-        }
-                    
-      });</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (err) {</pre></div></div>
             
         </li>
         
@@ -957,19 +1006,11 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
-              <p>Finally, callback with the answer.</p>
+              <p>that would be a db error, so it is our fault.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      callback(<span class="literal">null</span>, a);
-      
-    });
-    
-  };
-  
-  app.register.get = <span class="function"><span class="keyword">function</span> <span class="params">(number, callback)</span> {</span>
-            
-    Knoten.get(number, <span class="keyword">function</span>(err, knoten) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">return</span> app.fail(<span class="number">500</span>, <span class="string">"Sorry, this is a bug  m("</span>, callback);</pre></div></div>
             
         </li>
         
@@ -980,11 +1021,12 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
-              <p>respond with error, if any</p>
+              <p>If there was no error, we build an answer:</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (err) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          } 
+          <span class="keyword">else</span> {</pre></div></div>
             
         </li>
         
@@ -995,14 +1037,11 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
-              <p>we just assume a 404</p>
+              <p>Now, for each database object, </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        app.fail(<span class="number">404</span>, <span class="literal">null</span>, callback);
-        <span class="keyword">return</span>;
-      
-      } <span class="keyword">else</span> { <span class="comment">// if no error, </span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>          Object.keys(res).forEach(<span class="function"><span class="keyword">function</span> <span class="params">(nr)</span>{</span></pre></div></div>
             
         </li>
         
@@ -1013,15 +1052,11 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
-              <p>build answer        </p>
+              <p>make a tmp knoten, </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> a = {
-          <span class="string">"status"</span>: <span class="number">200</span>,
-          <span class="string">"msg"</span>: <span class="string">"ok"</span>,
-          <span class="string">"result"</span>: {
-            <span class="string">"number"</span>: knoten.number,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> knoten = {};</pre></div></div>
             
         </li>
         
@@ -1032,16 +1067,11 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
-              <p>we pick the just values we want from the db result</p>
+              <p>add the whitelisted properties  </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="string">"mac"</span>: knoten.mac,
-            <span class="string">"created_at"</span>: knoten.ctime,
-            <span class="string">"last_seen"</span>: knoten.mtime
-          }
-        };
-      }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            whitelist.forEach(<span class="function"><span class="keyword">function</span> <span class="params">(prop)</span> {</span></pre></div></div>
             
         </li>
         
@@ -1052,13 +1082,14 @@ if we reach this point, we are updating a registered number (also means pass was
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
-              <p>send the answer</p>
+              <p>(if they exist);</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      callback(a);
-    });
-  };</pre></div></div>
+            <div class="content"><div class='highlight'><pre>              <span class="keyword">if</span> (res[nr][prop]) {
+                knoten[prop] = res[nr][prop];
+              }
+            });</pre></div></div>
             
         </li>
         
@@ -1066,12 +1097,309 @@ if we reach this point, we are updating a registered number (also means pass was
         <li id="section-57">
             <div class="annotation">
               
-              <div class="pilwrap for-h1">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>and for each possible list</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            lists.forEach(<span class="function"><span class="keyword">function</span> <span class="params">(prop)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>if there is such a property, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>              <span class="keyword">if</span> (res[nr][prop]) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>add it to its list array; </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                list[prop].push(res[nr][prop] || knoten[prop]);
+            
+              }
+              <span class="keyword">else</span> <span class="keyword">if</span> (prop === <span class="string">"knoten"</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>also add the knoten itself into list. </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                list.knoten.push(knoten);
+            
+              }
+                          
+            });
+          
+          });
+        
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>now, for each possible list, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        lists.forEach(<span class="keyword">function</span>(prop) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>if the list is wanted, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span> (wanted.indexOf(prop) !== -<span class="number">1</span> ) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>add it to the result, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (prop === <span class="string">"knoten"</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>in case its a knoten in singular, </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>              a.result[prop] = list[prop];
+            
+            } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p>otherwise in plural.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>              a.result[prop + <span class="string">"s"</span>] = list[prop];
+
+            }
+          }
+                    
+        });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>Finally, callback with the answer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        callback(<span class="literal">null</span>, a);
+      
+      });
+      
+    });
+    
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <h2>app.register.get</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  app.register.get = <span class="function"><span class="keyword">function</span> <span class="params">(network_id, number, callback)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>Get the network</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>     Network.get(network_id, <span class="keyword">function</span>(err, network) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>fail if there was an error</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>       <span class="keyword">if</span> (err || !network) {
+         <span class="keyword">var</span> msg = <span class="string">"Network "</span> + network_id + <span class="string">" not found!"</span>;
+         <span class="keyword">return</span> app.fail(<span class="number">404</span>, msg, callback);
+       };
+       
+      network.getKnoten(number, <span class="keyword">function</span>(err, knoten) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>respond with error, if any</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (err || !knoten) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>we just assume a 404</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> msg = <span class="string">"No knoten "</span> + number + <span class="string">" found in network "</span> + network_id;
+          <span class="keyword">return</span> app.fail(<span class="number">404</span>, msg, callback);
+      
+        } <span class="keyword">else</span> { <span class="comment">// if no error, </span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-72">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-72">&#182;</a>
+              </div>
+              <p>build answer        </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">var</span> a = {
+            <span class="string">"status"</span>: <span class="number">200</span>,
+            <span class="string">"message"</span>: <span class="string">"ok"</span>,
+            <span class="string">"result"</span>: whiteList(knoten)
+          };
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>send the answer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        callback(a);
+      });
+      
+    });
+
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h1">
+                <a class="pilcrow" href="#section-74">&#182;</a>
               </div>
               <h1>AUTOREGISTRATION</h1>
 <ul>
-<li>CREATE(mac, pass) -&gt; NEW KNOTEN(NEW NUMBER)<ul>
+<li><code>CREATE(mac, pass) -&gt; NEW KNOTEN(NEW NUMBER)</code><ul>
 <li>check for pass &amp;&amp; mac</li>
 <li>check if mac is registered -&gt; redirect(303, number)</li>
 <li>if ok, fetch fresh number, then CREATE</li>
@@ -1082,16 +1410,16 @@ if we reach this point, we are updating a registered number (also means pass was
             </div>
             
             <div class="content"><div class='highlight'><pre>    
-  app.register.create = <span class="function"><span class="keyword">function</span> <span class="params">(mac, pass, callback)</span> {</span></pre></div></div>
+  app.register.create = <span class="function"><span class="keyword">function</span> <span class="params">(network_id, mac, pass, callback)</span> {</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-58">
+        <li id="section-75">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-75">&#182;</a>
               </div>
               <ul>
 <li>check for missing parameters</li>
@@ -1107,11 +1435,11 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-59">
+        <li id="section-76">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-76">&#182;</a>
               </div>
               <ul>
 <li>build given (request) data</li>
@@ -1120,16 +1448,17 @@ if we reach this point, we are updating a registered number (also means pass was
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> given = {};
+    given.network_id = network_id;
     given.pass = pass;</pre></div></div>
             
         </li>
         
         
-        <li id="section-60">
+        <li id="section-77">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-77">&#182;</a>
               </div>
               <ul>
 <li>check for invalid MAC (if any)</li>
@@ -1149,119 +1478,148 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-61">
+        <li id="section-78">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-78">&#182;</a>
               </div>
-              <p>Let&#39;s check if mac is already registered: </p>
+              <p>Get the network</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    Knoten.all(<span class="function"><span class="keyword">function</span> <span class="params">(err, registered)</span> {</span>
-                     
-      <span class="keyword">var</span> knoten, 
-          ok = <span class="literal">true</span>; <span class="comment">// we have to be optimistic</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>     Network.get(given.network_id, <span class="keyword">function</span>(err, network) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-62">
+        <li id="section-79">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-79">&#182;</a>
+              </div>
+              <p>fail if there was an error</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>       <span class="keyword">if</span> (err || !network) {
+         <span class="keyword">var</span> msg = <span class="string">"Network "</span> + given.network_id + <span class="string">" not found!"</span>;
+         <span class="keyword">return</span> app.fail(<span class="number">404</span>, msg, callback);
+       };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-80">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-80">&#182;</a>
+              </div>
+              <p>Let&#39;s check if mac is already registered in the network:</p>
+<p>TODO: use Knoten.find({&#39;network_id&#39;: given.network_id, &#39;mac&#39;: given.mac}, function(err, knoten) {};)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      network.knotens(<span class="function"><span class="keyword">function</span> <span class="params">(err, registered)</span> {</span>
+                     
+        <span class="keyword">var</span> knoten, 
+            ok = <span class="literal">true</span>; <span class="comment">// we have to be optimistic</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-81">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-81">&#182;</a>
               </div>
               <p>For each knoten, </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">for</span> (knoten <span class="keyword">in</span> registered){</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">for</span> (knoten <span class="keyword">in</span> registered){</pre></div></div>
             
         </li>
         
         
-        <li id="section-63">
+        <li id="section-82">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-82">&#182;</a>
               </div>
               <p>(filter unwanted properties from the prototype) and</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (registered[knoten].hasOwnProperty(<span class="string">"mac"</span>)) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span> (registered[knoten].hasOwnProperty(<span class="string">"mac"</span>)) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-64">
+        <li id="section-83">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
+                <a class="pilcrow" href="#section-83">&#182;</a>
               </div>
               <p>check if one the registered nodes has the given mac,    </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span> (given.mac === registered[knoten].mac) {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (given.mac === registered[knoten].mac) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-65">
+        <li id="section-84">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
+                <a class="pilcrow" href="#section-84">&#182;</a>
               </div>
               <p>and only then we are not <code>ok</code>!</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            ok = <span class="literal">false</span>;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>              ok = <span class="literal">false</span>;</pre></div></div>
             
         </li>
         
         
-        <li id="section-66">
+        <li id="section-85">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
+                <a class="pilcrow" href="#section-85">&#182;</a>
               </div>
               <ul>
-<li>build error result: </li>
+<li>whitelist: build error result:</li>
 </ul>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> r = {
-              <span class="string">"location"</span>: <span class="string">"/knoten/"</span> + registered[knoten].number,
-              <span class="string">"number"</span>: registered[knoten].number,           
-              <span class="string">"mac"</span>: registered[knoten].mac,
-              <span class="string">"last_seen"</span>: registered[knoten].mtime
-            };
+            <div class="content"><div class='highlight'><pre>              <span class="keyword">var</span> r = whiteList(registered[knoten]);
             
-          }
+            }
           
+          }
+      
         }
       
-      }
-      
-      <span class="keyword">if</span> (!ok) {</pre></div></div>
+        <span class="keyword">if</span> (!ok) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-67">
+        <li id="section-86">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
+                <a class="pilcrow" href="#section-86">&#182;</a>
               </div>
               <blockquote>
 <p>Error: no double entries!</p>
@@ -1269,30 +1627,32 @@ if we reach this point, we are updating a registered number (also means pass was
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        app.fail(<span class="number">303</span>, r, callback);            
-        <span class="keyword">return</span>;
+            <div class="content"><div class='highlight'><pre>          app.fail(<span class="number">303</span>, r, callback);            
+          <span class="keyword">return</span>;
         
-      } <span class="keyword">else</span> {
+        } <span class="keyword">else</span> {
         
-        getfirstFreeNumber(<span class="function"><span class="keyword">function</span> <span class="params">(err, number)</span> {</span>
+          getfirstFreeNumber(network, <span class="function"><span class="keyword">function</span> <span class="params">(err, number)</span> {</span>
           
-          <span class="keyword">if</span> (err) {
+            <span class="keyword">if</span> (err) {
             
-            app.fail(<span class="number">404</span>, <span class="string">"No free numbers!"</span>, callback);
-            <span class="keyword">return</span>;
+              app.fail(<span class="number">404</span>, <span class="string">"No free numbers!"</span>, callback);
+              <span class="keyword">return</span>;
             
-          } <span class="keyword">else</span> {
+            } <span class="keyword">else</span> {
           
-            given.number = number;
+              given.number = number;
           
-            app.log.debug(<span class="string">'Try Autocreate Knoten!'</span>, given);
-            createKnoten(given, callback);
+              app.log.debug(<span class="string">'Try Autocreate Knoten!'</span>, given);
+              createKnoten(network, given, callback);
             
-          }
+            }
           
-        });
+          });
         
-      }
+        }
+      
+      });
       
     });
     
@@ -1301,11 +1661,11 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-68">
+        <li id="section-87">
             <div class="annotation">
               
               <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-68">&#182;</a>
+                <a class="pilcrow" href="#section-87">&#182;</a>
               </div>
               <h2>REST: UPDATE</h2>
 <p>we validate input and find out which of these actions to do: </p>
@@ -1330,16 +1690,16 @@ if we reach this point, we are updating a registered number (also means pass was
             </div>
             
             <div class="content"><div class='highlight'><pre>  
-  app.register.update = <span class="function"><span class="keyword">function</span> <span class="params">(number, mac, pass, callback)</span> {</span></pre></div></div>
+  app.register.update = <span class="function"><span class="keyword">function</span> <span class="params">(network_id, number, mac, pass, callback)</span> {</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-69">
+        <li id="section-88">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-69">&#182;</a>
+                <a class="pilcrow" href="#section-88">&#182;</a>
               </div>
               <p>check for missing parameters</p>
 
@@ -1353,28 +1713,30 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-70">
+        <li id="section-89">
             <div class="annotation">
               
               <div class="pilwrap for-h1">
-                <a class="pilcrow" href="#section-70">&#182;</a>
+                <a class="pilcrow" href="#section-89">&#182;</a>
               </div>
               <h1>build given (request) data</h1>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> given = {};
-    given.number = parseInt(number);
-    given.pass = pass;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> given = {
+      number: parseInt(number),
+      network_id: network_id,
+      pass: pass
+    };</pre></div></div>
             
         </li>
         
         
-        <li id="section-71">
+        <li id="section-90">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-71">&#182;</a>
+                <a class="pilcrow" href="#section-90">&#182;</a>
               </div>
               <ul>
 <li>check for invalid MAC (if any)</li>
@@ -1394,29 +1756,46 @@ if we reach this point, we are updating a registered number (also means pass was
         </li>
         
         
-        <li id="section-72">
+        <li id="section-91">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-72">&#182;</a>
+                <a class="pilcrow" href="#section-91">&#182;</a>
               </div>
-              <p>HEARTBEAT:
-first, we check if the number already exists:</p>
+              <p>HEARTBEAT:</p>
+<p>first, we check if the number already exists:
+app.log.warn(&#39;network/&#39; + network_id + &#39;/&#39; + number);</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    Knoten.get(given.number, <span class="keyword">function</span>(err, registered) {
+            <div class="content"><div class='highlight'><pre>    Knoten.get(<span class="string">'network/'</span> + given.network_id + <span class="string">'/'</span> + given.number, <span class="keyword">function</span>(err, registered) {</pre></div></div>
             
+        </li>
+        
+        
+        <li id="section-92">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-92">&#182;</a>
+              </div>
+              <p>app.log.warn(err);
+app.log.warn(registered);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      
+      
       <span class="keyword">if</span> (!err) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-73">
+        <li id="section-93">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-73">&#182;</a>
+                <a class="pilcrow" href="#section-93">&#182;</a>
               </div>
               <p>NO error: 
 number exists! check &quot;auth&quot;!</p>
@@ -1426,41 +1805,40 @@ number exists! check &quot;auth&quot;!</p>
             <div class="content"><div class='highlight'><pre>        
         <span class="keyword">if</span> (registered.pass) {
           
-          <span class="keyword">if</span> (given.pass !== registered.pass) {</pre></div></div>
+          <span class="keyword">if</span> (!crypto.check(given.pass, registered.pass)) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-74">
+        <li id="section-94">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-74">&#182;</a>
+                <a class="pilcrow" href="#section-94">&#182;</a>
               </div>
               <p>the pass is wrong: Error 401 Unauthorized</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            app.fail(<span class="number">401</span>, <span class="string">"Wrong $PASS"</span>, callback);
-            <span class="keyword">return</span>;
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> app.fail(<span class="number">401</span>, <span class="string">"Wrong $PASS"</span>, callback);
           
           } <span class="keyword">else</span> {</pre></div></div>
             
         </li>
         
         
-        <li id="section-75">
+        <li id="section-95">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-75">&#182;</a>
+                <a class="pilcrow" href="#section-95">&#182;</a>
               </div>
               <p>&quot;auth&quot; succes, we have our knoten to update</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>            app.log.debug(<span class="string">'API: Try Update Knoten!'</span>, given);
-            updateKnoten(given, callback);
+            updateKnoten(given.network_id, given, callback);
           
           }
           
@@ -1469,54 +1847,33 @@ number exists! check &quot;auth&quot;!</p>
         </li>
         
         
-        <li id="section-76">
+        <li id="section-96">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-76">&#182;</a>
+                <a class="pilcrow" href="#section-96">&#182;</a>
               </div>
               <p>there was no pass to check, so the number was just &quot;reserved&quot;.
-since we still got a heartbeat, we may allow &quot;capturing&quot; the number.</p>
+since we still got a heartbeat, we may allow &quot;capturing&quot; the number. </p>
 
             </div>
             
-        </li>
-        
-        
-        <li id="section-77">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-77">&#182;</a>
-              </div>
-              <p>but only if it has a mac!
-TODO: ask @bittorf about this check, seems to make sense</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>          <span class="keyword">if</span> (!mac) {
-            app.fail(<span class="number">400</span>, <span class="literal">null</span>, callback);
-            <span class="keyword">return</span>;
-            
-          } <span class="keyword">else</span> {
-            
-            app.log.debug(<span class="string">'API: Try Capture Reserved Knoten!'</span>, given);
-            updateKnoten(given, callback);
-            
-          }
+            <div class="content"><div class='highlight'><pre>                     
+          app.log.debug(<span class="string">'API: Try Capture Reserved Knoten!'</span>, given);
+          updateKnoten(given.network_id, given, callback);
           
-        } 
+        }
       
       } <span class="keyword">else</span> {</pre></div></div>
             
         </li>
         
         
-        <li id="section-78">
+        <li id="section-97">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-78">&#182;</a>
+                <a class="pilcrow" href="#section-97">&#182;</a>
               </div>
               <p>REGISTRATION:
 db error: number does NOT exist! try new entry!</p>
@@ -1525,9 +1882,9 @@ db error: number does NOT exist! try new entry!</p>
             
             <div class="content"><div class='highlight'><pre>      
       app.log.debug(<span class="string">'API: Try Create Knoten!'</span>, given);
-      createKnoten(given, callback);
+      createKnoten(given.network_id, given, callback);
       
-    }
+      }
       
     });
     
@@ -1538,11 +1895,11 @@ db error: number does NOT exist! try new entry!</p>
         </li>
         
         
-        <li id="section-79">
+        <li id="section-98">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
+                <a class="pilcrow" href="#section-98">&#182;</a>
               </div>
               <p><code>exports.init</code> gets called by broadway on <code>app.init</code>.</p>
 
@@ -1553,11 +1910,11 @@ db error: number does NOT exist! try new entry!</p>
         </li>
         
         
-        <li id="section-80">
+        <li id="section-99">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
+                <a class="pilcrow" href="#section-99">&#182;</a>
               </div>
               <p>This plugin doesn&#39;t require any initialization step.</p>
 
