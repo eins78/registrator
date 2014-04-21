@@ -398,7 +398,7 @@ if (app.logfile && typeof app.logfile !== "boolean") {
 
                 if (err.status === 409) {
                   // we are just warning if a number already is in db
-                  app.log.debug("Failed to reserve exisiting knoten #" + nr + "!", err);
+                  app.log.debug("Failed to reserve exisiting knoten #" + nr + "!");
                   return callback(null);  
                 }
                 
